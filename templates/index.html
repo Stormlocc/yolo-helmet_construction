@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO Video Detection</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <card class="card" style="width: 18rem;">
+    <div class="container mt-5">
+        <h1 class="card-text" >YOLO Video Detection</h1>
+        <img id="video" class="img-fluid" src="{{ url_for('webcam') }}" alt="YOLO Video Stream">
+    </div>
+    </card>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Función para actualizar el src de la imagen cada 1000 ms (1 segundo)
+        function updateImage() {
+            document.getElementById("video").src = "{{ url_for('webcam') }}";
+        }
+        setInterval(updateImage, 1000);
+    </script>
+</body>
+</html>
