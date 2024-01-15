@@ -7,12 +7,14 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <card class="card" style="width: 28rem;">
-    <div class="container mt-5">
-        <h1 class="card-text" >YOLO Video Detection</h1>
+
+    <card class="card mx-auto" style="width: 28rem;">
+    <div class="container align-items-center justify-content-center mt-5">
+        <h1 class="card-text text-center">YOLO Video Detection</h1>
         <img id="video" class="img-fluid" src="{{ url_for('webcam') }}" alt="YOLO Video Stream">
     </div>
     </card>
+
 
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -25,7 +27,7 @@
         function updateImage() {
             document.getElementById("video").src = "{{ url_for('webcam') }}";
         }
-        setInterval(updateImage, 1000);
+        setInterval(updateImage, 800);
     </script>
 </body>
 </html>

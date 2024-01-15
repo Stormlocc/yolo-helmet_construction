@@ -1,95 +1,45 @@
 from ultralytics import YOLO
 import cv2
-import math
 
 
-'''La idea es grabar un video en donde identifica objetos y muestra las etiquetas y la confianza'''
-def video_detection(path_x):
-    video_capture = path_x
-    #Crear la webcam
-    cap = cv2.VideoCapture(0)
-    frame_width = int(cap.get(3))
-    frame_height = int(cap.get(4))
+def draw_and_label(img, box, class_name, confidence):
+    x1, y1, x2, y2 = map(int, box.xyxy[0])
+    color = COLORS.get(class_name, (0, 0, 255))  # Default to red if class not found
+    cv2.rectangle(img, (x1, y1), (x2, y2), color, 3)
+    cv2.rectangle(img, (x1, y1), (x1 + 150, y1 - 25), color, -1, cv2.LINE_AA)
 
-    #out = cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, (frame_width,frame_height))
+    label = f'{class_name} {confidence:.2f}'
+    cv2.putText(img, label, (x1, y1 - 2), 0, 0.6, [255, 255, 255], thickness=1, lineType=cv2.LINE_AA)
 
-    #model = YOLO('YOLO-Weight/best.pt')
+
+def video_detection(video_path):
+    cap = cv2.VideoCapture(video_path)  # Update with the correct video path
+
     model = YOLO('best.pt')
-
-    #Donde se utiliza no es necesario utilzar, solo es para tener el ID
-    ''' 
-    classNames = ["person", "bicycle", "car", "motorcycle",
-                "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant",
-                "unknown", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse",
-                "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "unknown", "backpack",
-                "umbrella", "unknown", "unknown", "handbag", "tie", "suitcase", "frisbee", "skis",
-                "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard",
-                "surfboard", "tennis racket", "bottle", "unknown", "wine glass", "cup", "fork", "knife",
-                "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog",
-                "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "unknown", "dining table",
-                "unknown", "unknown", "toilet", "unknown", "tv", "laptop", "mouse", "remote", "keyboard",
-                "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "unknown",
-                "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush" ] '''
-
-    classNames = ["Head","Casco"]
 
     while True:
         success, img = cap.read()
+        if not success:
+            break
 
-        #stream true is more efficient
         results = model(img, stream=True)
 
         for r in results:
             boxes = r.boxes
             for box in boxes:
-                x1,y1,x2,y2= box.xyxy[0]
-                x1, y1, x2, y2 =  int(x1), int(y1), int(x2), int(y2)
-                #print(x1,y1,x2,y2)
-                cv2.rectangle(img, (x1,y1) ,(x2,y2), (255,0,255), 3)
-                #print(box.conf[0])
-                confianza = math.ceil((box.conf[0]*100)) / 100
-                cls = int (box.cls[0])
-                #Esto es para el ID
-                class_name = classNames[cls]
-                label = f'{class_name}{confianza}'
-                #Buscar el tamaño de etiqueta cuadro
-                t_size = cv2.getTextSize(label,0,fontScale=1,thickness=2)[0]
+                confidence = box.conf[0]
+                class_index = int(box.cls[0])
+                class_name = classNames[class_index]
 
-                c2 = x1 + t_size[0], y1-t_size[1] - 3
-                if class_name == "Head":
-                    color = (0,204,255)
-                elif class_name == "Cabeza":
-                    color = (222,81,175)
-                else:
-                    color = (85,45,255)
-
-                if confianza>0.5:
-                    cv2.rectangle(img, (x1,y1), (x2,y2), color, 3)
-                    cv2.rectangle(img, (x1,y1), c2, color, -1, cv2.LINE_AA)    #filled
-                    cv2.putText(img, label, (x1,y1-2), 0 , 1, [255,255,255],thickness=1, lineType=cv2.LINE_AA) #colocar el text
+                if confidence > 0.5:
+                    draw_and_label(img, box, class_name, confidence)
 
         yield img
 
-        #out.relace()
+    cap.release()
     cv2.destroyAllWindows()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Define class names and colors
+classNames = ["Head", "Casco"]
+COLORS = {"Head": (0, 204, 255), "Casco": (222, 81, 175)}
