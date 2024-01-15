@@ -8,7 +8,7 @@ import threading
 sound_path = os.path.join(os.path.dirname(__file__), "pitido.mp3")
 
 def mensaje_wpp(alerta):
-    pywhatkit.sendwhatmsg_instantly("+51946721433", alerta, 5, True, 4)
+    pywhatkit.sendwhatmsg_instantly("+51946760874", alerta, 5, True, 4)
 
 def draw_and_label(img, box, class_name, confidence):
     x1, y1, x2, y2 = map(int, box.xyxy[0])
