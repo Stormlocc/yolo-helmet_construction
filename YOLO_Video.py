@@ -13,9 +13,11 @@ def video_detection(path_x):
 
     #out = cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, (frame_width,frame_height))
 
-    model = YOLO('../YOLO-Weight/yolov8n.pt')
+    #model = YOLO('YOLO-Weight/best.pt')
+    model = YOLO('best.pt')
 
     #Donde se utiliza no es necesario utilzar, solo es para tener el ID
+    ''' 
     classNames = ["person", "bicycle", "car", "motorcycle",
                 "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant",
                 "unknown", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse",
@@ -27,7 +29,9 @@ def video_detection(path_x):
                 "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "unknown", "dining table",
                 "unknown", "unknown", "toilet", "unknown", "tv", "laptop", "mouse", "remote", "keyboard",
                 "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "unknown",
-                "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush" ]
+                "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush" ] '''
+
+    classNames = ["Head","Casco"]
 
     while True:
         success, img = cap.read()
@@ -52,8 +56,17 @@ def video_detection(path_x):
                 t_size = cv2.getTextSize(label,0,fontScale=1,thickness=2)[0]
 
                 c2 = x1 + t_size[0], y1-t_size[1] - 3
-                cv2.rectangle(img, (x1,y1), c2, [255,255,0], -1, cv2.LINE_AA)    #filled
-                cv2.putText(img, label, (x1,y1-2), 0 , 1, [255,255,255],thickness=1, lineType=cv2.LINE_AA) #colocar el text
+                if class_name == "Head":
+                    color = (0,204,255)
+                elif class_name == "Cabeza":
+                    color = (222,81,175)
+                else:
+                    color = (85,45,255)
+
+                if confianza>0.5:
+                    cv2.rectangle(img, (x1,y1), (x2,y2), color, 3)
+                    cv2.rectangle(img, (x1,y1), c2, color, -1, cv2.LINE_AA)    #filled
+                    cv2.putText(img, label, (x1,y1-2), 0 , 1, [255,255,255],thickness=1, lineType=cv2.LINE_AA) #colocar el text
 
         yield img
 
