@@ -1,5 +1,14 @@
 from ultralytics import YOLO
 import cv2
+import os
+from playsound import playsound
+import pywhatkit
+import threading
+
+sound_path = os.path.join(os.path.dirname(__file__), "pitido.mp3")
+
+def mensaje_wpp(alerta):
+    pywhatkit.sendwhatmsg_instantly("+51946721433", alerta, 5, True, 4)
 
 def draw_and_label(img, box, class_name, confidence):
     x1, y1, x2, y2 = map(int, box.xyxy[0])
@@ -12,16 +21,17 @@ def draw_and_label(img, box, class_name, confidence):
 def video_detection(video_path):
     cap = cv2.VideoCapture(video_path)  # Update with the correct video path
     model = YOLO('best.pt')
-
+    cont = 0
     while True:
         success, img = cap.read()
         if not success:
             break
 
         results = model(img, stream=True)
-
+        
         for r in results:
             boxes = r.boxes
+            
             for box in boxes:
                 confidence = box.conf[0]
                 class_index = int(box.cls[0])
@@ -29,7 +39,16 @@ def video_detection(video_path):
 
                 if confidence > 0.5:
                     draw_and_label(img, box, class_name, confidence)
+                    
+                    if class_name == "Head":
+                        playsound(sound_path)
 
+                        if cont == 0:
+                            threading_emails = threading.Thread(target=mensaje_wpp, args=("Alerta",))
+                            threading_emails.start()
+                            cont = 30
+                        cont = cont - 1
+                               
         yield img
 
     cap.release()
