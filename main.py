@@ -18,13 +18,11 @@ def generate_frames(path_x=''):
 def index():
     return render_template('index.html')
 
-@socketio.on('connect')
-def connect():
-    print('Web client connected')
+@app.route('/webcam')
+def webcam():
+    #Activar camara
+    return Response(generate_frames(path_x=0),mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@socketio.on('disconnect')
-def disconnect():
-    print('Web client disconnected')
 
 @socketio.on('request_frame')
 def request_frame():
