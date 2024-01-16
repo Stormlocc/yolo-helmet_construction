@@ -1,18 +1,34 @@
 from flask import Flask, render_template, Response
 from flask_socketio import SocketIO
+from flask_cors import CORS  
 from YOLO_Video import video_detection
 import cv2
 
 app = Flask(__name__)
 socketio = SocketIO(app)
-
+CORS(app)
+#sound_active = False
 def generate_frames(path_x=''):
+    sound_active = False
+
     yolo_output = video_detection(path_x)
-    for detection_ in yolo_output:
-        ref, buffer = cv2.imencode('.jpg', detection_)
-        frame = buffer.tobytes()
-        yield (b' --frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    try:
+        for detection_, sound_active in video_detection(path_x):
+            ref, buffer = cv2.imencode('.jpg', detection_)
+            frame = buffer.tobytes()
+            yield (
+            b' --frame\r\n'
+            b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n'
+            b'Content-Sound-Active: {}\r\n\r\n' + frame + b'\r\n'
+            #b'Content-Sound-Active: {}\r\n\r\n'.format(sound_active).encode() + frame + b'\r\n')
+            #b'Content-Sound-Active: {}\r\n\r\n'+ frame + b'\r\n'
+            )
+    except cv2.error as e:
+        print(f"Error en OpenCV:  {e}")
+    except Exception as e:
+        print(f"Error en generate_frames: {e}")
+        #sound_active = False
+    
 
 @app.route('/')
 def index():

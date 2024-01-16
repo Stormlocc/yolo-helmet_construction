@@ -4,8 +4,17 @@ import os
 from playsound import playsound
 import pywhatkit
 import threading
+import tempfile
 
-sound_path = os.path.join(os.path.dirname(__file__), "pitido.mp3")
+#from roboflow import Roboflow
+
+#rf = Roboflow(api_key="QOyHgu7gYbwh4MAs5cO9")
+#project = rf.workspace().project("deteccion_casos")
+#sound_path = os.path.join(tempfile.gettempdir(), "pitido.mp3")
+
+
+#sound_path = os.path.join(os.path.dirname(__file__), "pitido.mp3")
+sound_active = False 
 
 def mensaje_wpp(alerta):
     pywhatkit.sendwhatmsg_instantly("+51946721433", alerta, 5, True, 4)
@@ -21,9 +30,13 @@ def draw_and_label(img, box, class_name, confidence):
 
 
 def video_detection(video_path):
+    global sound_active 
     cap = cv2.VideoCapture(video_path)  # Update with the correct video path
+    #cap = cv2.VideoCapture(0, cv2.CAP_VFW)
 
-    model = YOLO('best.pt')
+    #model = project.version(1).model
+    model = YOLO('../YOLO-Weight/yolov8n.pt')
+    #print(model)
     cont = 0
     while True:
         success, img = cap.read()
@@ -38,21 +51,35 @@ def video_detection(video_path):
             for box in boxes:
                 confidence = box.conf[0]
                 class_index = int(box.cls[0])
-                class_name = classNames[class_index]
+                class_name = None  # Inicializar la variable fuera del bucle
 
-                if confidence > 0.5:
+                if 0 <= class_index < len(classNames):
+                    class_name = classNames[class_index]
+                #class_name = classNames[class_index]
+
+                if confidence > 0.8:
                     draw_and_label(img, box, class_name, confidence)
                     
                     if class_name == "Head":
-                        playsound(sound_path)
+                        #playsound(sound_path)
+                        #try:
+                            #playsound(sound_path)
+                        #except playsound.PlaysoundException as e:
+                        #    print(f"Error al reproducir el sonido: {e}")
+
+                        sound_active = True  # Activar la variable de sonido
 
                         if cont == 0:
-                            threading_emails = threading.Thread(target=mensaje_wpp, args=("Alerta",))
-                            threading_emails.start()
+                            #threading_emails = threading.Thread(target=mensaje_wpp, args=("Alerta",))
+                            #threading_emails.start()
                             cont = 30
                         cont = cont - 1
-                               
-        yield img
+                    else:
+                        sound_active = False  # Desactivar la variable de sonido si no es "Head"
+
+        '''yolo_output = video_detection(path_x)
+        for detection_, sound_active in yolo_output:'''
+        yield img, sound_active
 
     cap.release()
     cv2.destroyAllWindows()

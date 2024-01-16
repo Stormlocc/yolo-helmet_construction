@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,18 +6,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YOLO Video Detection</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static',filename='styles.css')}}">
+    <style>
+        /* Estilo para la primera sección (celeste) */
+        #presentation-section {
+            background-color: #87CEEB; /* Celeste */
+            height: 100vh; /* Tamaño completo de la ventana */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Estilo para la segunda sección (blanco) oculta inicialmente */
+        /*#webcam-section {
+            background-color: white;
+            height: 100vh; /* Tamaño completo de la ventana */
+            /*display: none; /* Inicialmente oculto */
+            /*flex-direction: column; /* Alineación vertical de elementos */
+        /*}
+
+        /* Estilo para el botón en la segunda sección */
+        #Primer-button {
+            margin-top: 20px; /* Margen superior para separar del video */
+            margin-bottom: 20px; /* Margen inferior para separar del video */
+            padding: 15px 30px; /* Ajusta el tamaño del botón */
+            font-size: 18px; /* Ajusta el tamaño del texto del botón */
+        }
+        /* Estilo para el botón en la segunda sección */
+        #Segundo-button {
+            margin-top: 20px; /* Margen superior para separar del video */
+            margin-bottom: 20px; /* Margen inferior para separar del video */
+            padding: 15px 30px; /* Ajusta el tamaño del botón */
+            font-size: 18px; /* Ajusta el tamaño del texto del botón */
+        }
+
+    </style>
 </head>
 <body>
 
-    <card class="card mx-auto" style="width: 28rem;">
-    <div class="container align-items-center justify-content-center mt-5">
-        <h1 class="card-text text-center">YOLO Video Detection</h1>
-        <img id="video" class="img-fluid" src="{{ url_for('webcam') }}" alt="YOLO Video Stream">
+    <!-- Primera sección (celeste) -->
+    <div id="presentation-section">
+        <div class="card mx-auto" style="width: 28rem;">
+            <div class="container align-items-center justify-content-center mt-5">
+                <h1 class="card-text text-center">Detección en vivo de personas con y sin casco</h1>
+                <!-- Agrega aquí tu foto y botón -->
+                <button id="Primer-button"  onclick="showWebcam()">Ir a la Webcam</button>
+            </div>
+            
+        </div>
+
     </div>
-    </card>
 
-
+    <!-- Segunda sección (blanco) oculta inicialmente -->
+    <div id="webcam-section">
+        <div class="card mx-auto" style="width: 28rem;">
+            <div class="container align-items-center justify-content-center mt-5">
+                <h1 class="card-text text-center">YOLO Video Detection</h1>
+                <img id="video" class="img-fluid" src="{{ url_for('webcam') }}" alt="YOLO Video Stream">
+                <!--<video id="video" class="img-fluid" autoplay></video>-->
+                <button onclick="showPresentation()">Volver a la Presentación</button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
@@ -24,11 +74,44 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        // Función para actualizar el src de la imagen cada 1000 ms (1 segundo)
+        //
         function updateImage() {
-            document.getElementById("video").src = "{{ url_for('webcam') }}";
+            var xhr = new XMLHttpRequest();
+            xhr.open("HEAD", "{{ url_for('webcam') }}", true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 2) {
+                    var soundActiveHeader = xhr.getResponseHeader("Content-Sound-Active");
+                    document.body.style.backgroundColor = soundActiveHeader === "True" ? "blue" : "red";
+                }
+            };
+        xhr.send();
+        document.getElementById("video").src = "{{ url_for('webcam') }}?_="+ new Date().getTime();
         }
-        setInterval(updateImage, 800);
+        function showWebcam() {
+            // Mostrar la segunda sección y ocultar la primera
+            document.getElementById("presentation-section").style.display = "none";
+            document.getElementById("webcam-section").style.display = "flex";
+
+            // Acceder a la cámara de la laptop
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (stream) {
+                    var video = document.getElementById("video");
+                    video.srcObject = stream;
+                })
+                .catch(function (error) {
+                    console.log("Error accessing camera: " + error);
+                });
+            updateImage();
+        }
+
+        function showPresentation() {
+            // Mostrar la primera sección y ocultar la segunda
+            document.getElementById("presentation-section").style.display = "flex";
+            document.getElementById("webcam-section").style.display = "none";
+        }
+
     </script>
 </body>
 </html>
+
+
