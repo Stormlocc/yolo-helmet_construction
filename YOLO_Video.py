@@ -51,9 +51,6 @@ def video_detection(video_path):
                         playsound(sound_path)
                         sound_active = True
 
-                        if cont == 0:
-                            cont = 30
-                        cont = cont - 1
                     else:
                         sound_active = False
 
